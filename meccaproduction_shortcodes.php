@@ -65,10 +65,10 @@ function getCategoryList(){
 
 		$args = array(
 		     'taxonomy'     => $taxonomy,
-		     'meta_query' => [[
+		     /*'meta_query' => [
 			    'key' => $meta_key,
 			    'type' => 'NUMERIC',
-			 ]],
+			 ],*/
 		     'orderby'      => $orderby,
 		     'show_count'   => $show_count,
 		     'pad_counts'   => $pad_counts,
