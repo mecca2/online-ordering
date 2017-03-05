@@ -174,8 +174,8 @@ class Meccaproduction_Public {
 
 	    		$pickup_location = $this->getLatLong($geocoding_api_key, $pickup_address1, $pickup_city, $pickup_state);
 
-	    		//$pickup_lat = array_values($pickup_location)[0][0][geometry][location][lat];
-				//$pickup_long = array_values($pickup_location)[0][0][geometry][location][lng];
+	    		$pickup_lat = array_values($pickup_location)[0][0][geometry][location][lat];
+				$pickup_long = array_values($pickup_location)[0][0][geometry][location][lng];
 
 				$destination_address1 = $order->shipping_address_1;
 				$destination_city = $order->shipping_city;
@@ -183,8 +183,8 @@ class Meccaproduction_Public {
 
 				$destination_location = $this->getLatLong($geocoding_api_key, $destination_address1, $destination_city, $destination_state);
 
-				//$destination_lat = array_values($destination_location)[0][0][geometry][location][lat];
-				//$destination_long = array_values($destination_location)[0][0][geometry][location][lng];
+				$destination_lat = array_values($destination_location)[0][0][geometry][location][lat];
+				$destination_long = array_values($destination_location)[0][0][geometry][location][lng];
 
 				$tripArray = array_values($this->getDistanceBetweenAddresses($this->meccaproduction_options['google_distance_matrix_api_key'], $pickup_lat . ",". $pickup_long, $destination_lat . "," . $destination_long));
 
