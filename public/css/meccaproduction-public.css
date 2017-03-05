@@ -1,0 +1,87 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+pre{
+	display: block;
+    margin: 0px;
+    padding: 0px;
+    white-space: normal;
+}
+ .slick-prev:before, .slick-next:before{
+ 	color:#000;
+ }
+.product-slider{
+	margin-top: 20px;
+}
+ .product_container{
+    width: 80%;
+    margin: auto;
+    padding: 10px;
+    border-radius: 4px;
+    border: solid 2px #7c0002;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#45484d+0,2b2b2b+100 */
+	background: #45484d; /* Old browsers */
+	background: -moz-radial-gradient(center, ellipse cover,  #45484d 0%, #2b2b2b 100%); /* FF3.6-15 */
+	background: -webkit-radial-gradient(center, ellipse cover,  #45484d 0%,#2b2b2b 100%); /* Chrome10-25,Safari5.1-6 */
+	background: radial-gradient(ellipse at center,  #45484d 0%,#2b2b2b 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#2b2b2b',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+ }
+.product_title h1{
+	color:#fff;
+	text-align: center;
+	font-size: 14px;
+    padding: 10px 0px;
+}
+.product_image img{
+	margin: auto; 
+}
+.product_cat_nav{
+	text-align: center;
+	    border-bottom: solid 1px #e6e6e6;
+    margin: 0px;
+    padding: 0px !important;
+}
+.product_cat_nav li{
+	list-style: none; 
+	display: inline-block;
+	padding: 10px 20px; 
+}
+
+.mp_order_footer{
+	position: fixed;
+	bottom: 0px; 
+	width:100%;
+	background: #7c0002; 
+	color: #fff;
+	padding: 10px;
+    text-align: center;
+    border-top: solid 1px #e6e6e6;
+}
+.mp_order_footer .mp_footer_block{
+	padding: 0px 10px; 
+}
+#mp_order_details{
+	position: relative;
+    display: inline-block;
+}
+
+#mp_order_details .mp_order_info{
+	display: none; 
+	position: absolute;
+     right: 0px;
+    left: 0px;
+    bottom: 25px;
+    background: #7c0002;
+    border: solid 1px #e6e6e6;
+    border-bottom: 0px;
+    width: 300px;
+}
+#mp_order_details.show-menu .mp_order_info{
+	display: block;
+}
+#mp_order_details .mp_order_info ul li{
+	padding: 5px;
+    border-bottom: solid 1px #e6e6e6;
+}
