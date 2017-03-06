@@ -117,13 +117,12 @@ class Meccaproduction_Public {
 			    $djd = json_decode(utf8_encode($du),true);
 
 			    if($_GET["debug"] == 1) {
-			    	echo "API Key: " . $APIKey . "<br>";
-			    	echo "Address 1: " . $address1 . "<br>";
+			    	echo "Geocode API Key: " . $APIKey . "<br>";
+			    	echo "Address: " . $address1 . "<br>";
 			    	echo "City: " . $city . "<br>";
 			    	echo "State: " . $state . "<br>";
-		    		echo "Request URL: " . $fullGoogleURL . "<br>";
+		    		echo "Google Maps Geocode Request URL: " . $fullGoogleURL . "<br>";
 		    		echo "<br>";
-		    		print_r(array_values($djd));
 			    }
 
 			    return $djd;
@@ -145,7 +144,7 @@ class Meccaproduction_Public {
 				$fullGoogleURL = $googleURL . $format . "?origins=". $origins . "&destinations=" . $destinations . "&key=" . $APIKey . "&units=imperial";
 
 				if($_GET["debug"] == 1) {
-					echo "<br>URL Request: " . $fullGoogleURL . "<br><br>";
+					echo "<br>Google Maps Matrix URL Request: " . $fullGoogleURL . "<br><br>";
 				}
 
 				$du = file_get_contents($fullGoogleURL);
@@ -192,9 +191,158 @@ class Meccaproduction_Public {
 
 				echo "Approximate travel time: " . $travel_time;
 
+				return $travel_time;
+
 			}
 
 		}
+
+	}
+
+	public function calculateDeliveryTime($order_id) {
+
+		$order = wc_get_order( $order_id );
+
+		$travelTime = $this->calculateTravelTime($order_id);
+		$prepTime = $this->meccaproduction_options['pizza_prep_time'];
+		$cookTime = $this->meccaproduction_options['pizza_cook_time'];
+
+		$deliveryDuration= $travelTime / 60 + $prepTime + $cookTime;
+
+		$intDeliveryDuration= (int)$deliveryDuration;
+
+		return $deliveryDuration;
+	}
+
+	public function verifyMinimumSubtotal() {
+
+		$minimum = $this->meccaproduction_options['minimum_delivery_subtotal'];
+		$cart_subtotal = WC()->cart->get_cart_subtotal();
+
+		if(WC()->cart->subtotal < $this->meccaproduction_options['minimum_delivery_subtotal'] && WC()->cart->shipping_total != 0){
+	            wc_print_notice( 
+	                sprintf( "<strong>We're sorry, the minimum delivery subtotal is %s and your order total is %s.  Please change your selection to Take Out or continue shopping.</strong> " , 
+	                    wc_price( $minimum ), 
+	                    wc_price( WC()->cart->subtotal )
+	                ), 'error' 
+	            );
+
+	            remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+				add_action('woocommerce_proceed_to_checkout', 'disable_proceed_to_checkout', 20);
+
+				function disable_proceed_to_checkout() { ?>
+					<a href="<?php echo $extra_url; ?>" class="checkout-button button alt wc-forward" id="checkout-error">
+						<?php _e( 'Unable to Checkout - Minimum Order Amount', 'woocommerce' ); ?>
+					</a>
+				<?php
+				}
+		}else {
+			echo "<script>jQuery('.woocommerce-error').hide();</script>";
+		}
+	}
+
+	function get_order_details($order_id){
+
+	    // 1) Get the Order object
+	    $order = wc_get_order( $order_id );
+
+	    // OUTPUT
+	    echo '<h3>RAW OUTPUT OF THE ORDER OBJECT: </h3>';
+	    print_r($order);
+	    echo '<br><br>';
+	    echo '<h3>THE ORDER OBJECT (Using the object syntax notation):</h3>';
+	    echo '$order->order_type: ' . $order->order_type . '<br>';
+	    echo '$order->id: ' . $order->id . '<br>';
+	    echo '<h4>THE POST OBJECT:</h4>';
+	    echo '$order->post->ID: ' . $order->post->ID . '<br>';
+	    echo '$order->post->post_author: ' . $order->post->post_author . '<br>';
+	    echo '$order->post->post_date: ' . $order->post->post_date . '<br>';
+	    echo '$order->post->post_date_gmt: ' . $order->post->post_date_gmt . '<br>';
+	    echo '$order->post->post_content: ' . $order->post->post_content . '<br>';
+	    echo '$order->post->post_title: ' . $order->post->post_title . '<br>';
+	    echo '$order->post->post_excerpt: ' . $order->post->post_excerpt . '<br>';
+	    echo '$order->post->post_status: ' . $order->post->post_status . '<br>';
+	    echo '$order->post->comment_status: ' . $order->post->comment_status . '<br>';
+	    echo '$order->post->ping_status: ' . $order->post->ping_status . '<br>';
+	    echo '$order->post->post_password: ' . $order->post->post_password . '<br>';
+	    echo '$order->post->post_name: ' . $order->post->post_name . '<br>';
+	    echo '$order->post->to_ping: ' . $order->post->to_ping . '<br>';
+	    echo '$order->post->pinged: ' . $order->post->pinged . '<br>';
+	    echo '$order->post->post_modified: ' . $order->post->post_modified . '<br>';
+	    echo '$order->post->post_modified_gtm: ' . $order->post->post_modified_gtm . '<br>';
+	    echo '$order->post->post_content_filtered: ' . $order->post->post_content_filtered . '<br>';
+	    echo '$order->post->post_parent: ' . $order->post->post_parent . '<br>';
+	    echo '$order->post->guid: ' . $order->post->guid . '<br>';
+	    echo '$order->post->menu_order: ' . $order->post->menu_order . '<br>';
+	    echo '$order->post->post_type: ' . $order->post->post_type . '<br>';
+	    echo '$order->post->post_mime_type: ' . $order->post->post_mime_type . '<br>';
+	    echo '$order->post->comment_count: ' . $order->post->comment_count . '<br>';
+	    echo '$order->post->filter: ' . $order->post->filter . '<br>';
+	    echo '<h4>THE ORDER OBJECT (again):</h4>';
+	    echo '$order->order_date: ' . $order->order_date . '<br>';
+	    echo '$order->modified_date: ' . $order->modified_date . '<br>';
+	    echo '$order->customer_message: ' . $order->customer_message . '<br>';
+	    echo '$order->customer_note: ' . $order->customer_note . '<br>';
+	    echo '$order->post_status: ' . $order->post_status . '<br>';
+	    echo '$order->prices_include_tax: ' . $order->prices_include_tax . '<br>';
+	    echo '$order->tax_display_cart: ' . $order->tax_display_cart . '<br>';
+	    echo '$order->display_totals_ex_tax: ' . $order->display_totals_ex_tax . '<br>';
+	    echo '$order->display_cart_ex_tax: ' . $order->display_cart_ex_tax . '<br>';
+	    echo '$order->billing_address_1: ' . $order->billing_address_1. '<br>';
+	    echo '$order->billing_address_2: ' . $order->billing_address_2. '<br>';
+	    echo '$order->billing_city: ' . $order->billing_city. '<br>';
+	    echo '$order->billing_state: ' . $order->billing_state. '<br>';
+	    echo '$order->billing_postcode: ' . $order->billing_postcode. '<br>';
+	    echo '$order->billing_country: ' . $order->billing_country. '<br>';
+	    echo '$order->shipping_address_1: ' . $order->shipping_address_1. '<br>';
+	    echo '$order->shipping_address_2: ' . $order->shipping_address_2. '<br>';
+	    echo '$order->shipping_city: ' . $order->shipping_city. '<br>';
+	    echo '$order->shipping_state: ' . $order->shipping_state. '<br>';
+	    echo '$order->shipping_postcode: ' . $order->shipping_postcode. '<br>';
+	    echo '$order->shipping_country: ' . $order->shipping_country. '<br>';
+	    echo '$order->city=: ' . $order->city. '<br>';
+	    echo '$order->state=: ' . $order->state. '<br>';
+	    echo '$order->postcode=: ' . $order->postcode. '<br>';
+	    echo '$order->country=: ' . $order->country. '<br>';
+	    echo '$order->formatted_shipping_address->protected: ' . $order->formatted_shipping_address . '<br><br>';
+	    echo '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - <br><br>';
+
+	    // 2) Get the Order meta data
+	    $order_meta = get_post_meta($order_id);
+
+	    echo '<h3>RAW OUTPUT OF THE ORDER META DATA (ARRAY): </h3>';
+	    print_r($order_meta);
+	    echo '<br><br>';
+	    echo '<h3>THE ORDER META DATA (Using the array syntax notation):</h3>';
+	    echo '$order_meta[_order_key][0]: ' . $order_meta[_order_key][0] . '<br>';
+	    echo '$order_meta[_order_currency][0]: ' . $order_meta[_order_currency][0] . '<br>';
+	    echo '$order_meta[_prices_include_tax][0]: ' . $order_meta[_prices_include_tax][0] . '<br>';
+	    echo '$order_meta[_customer_user][0]: ' . $order_meta[_customer_user][0] . '<br>';
+	    echo '$order_meta[_billing_first_name][0]: ' . $order_meta[_billing_first_name][0] . '<br><br>';
+	    echo 'And so on ……… <br><br>';
+	    echo '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - <br><br>';
+
+	    // 3) Get the order items
+	    $items = $order->get_items();
+
+	    echo '<h3>RAW OUTPUT OF THE ORDER ITEMS DATA (ARRAY): </h3>';
+
+	    foreach ( $items as $item_id => $item_data ) {
+
+	        echo '<h4>RAW OUTPUT OF THE ORDER ITEM NUMBER: '. $item_id .'): </h4>';
+	        print_r($item);
+	        echo '<br><br>';
+	        echo 'Item ID: ' . $item_id. '<br>';
+	        echo '$item["product_id"] <i>(product ID)</i>: ' . $item['product_id'] . '<br>';
+	        echo '$item["name"] <i>(product Name)</i>: ' . $item['name'] . '<br>';
+
+	        // Using get_item_meta() method
+	        echo 'Item quantity <i>(product quantity)</i>: ' . $order->get_item_meta($item_id, '_qty', true) . '<br><br>';
+	        echo 'Item line total <i>(product quantity)</i>: ' . $order->get_item_meta($item_id, '_line_total', true) . '<br><br>';
+	        echo 'And so on ……… <br><br>';
+	        echo '- - - - - - - - - - - - - <br><br>';
+	    }
+	    echo '- - - - - - E N D - - - - - <br><br>';
 
 	}
 
