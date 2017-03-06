@@ -1,32 +1,4 @@
 <?php
-/*
-
-Options to override template files in woocommerce if needed. Can also use the function in shortcodes to override specific pages. 
-add_filter( 'wc_get_template', 'meccaproduction_template_overrides', 10, 5 );
-
-function meccaproduction_template_overrides( $located, $template_name, $args, $template_path, $default_path ) {    
-    if ( 'myaccount/my-orders.php' == $template_name ) {
-        $located = plugin_dir_path( __FILE__ ) . 'templates/orders.php';
-    }
-    
-    return $located;
-}
-
-// Hook in
-add_filter( 'woocommerce_checkout_fields' , 'custom_override_checkout_fields' );
-
-// Our hooked in function - $fields is passed via the filter!
-function custom_override_checkout_fields( $fields ) {
-     $fields['order']['order_name'] = array(
-        'label'     => __('Order Name', 'woocommerce'),
-    'placeholder'   => _x('Order Name', 'placeholder', 'woocommerce'),
-    'required'  => false,
-    'class'     => array('form-row-wide'),
-    'clear'     => true
-     );
-
-     return $fields;
-}*/
 
 
 
@@ -69,25 +41,6 @@ function my_custom_checkout_field_display_admin_order_meta($order){
 }
 
 
-add_action( 'woocommerce_product_options_general_product_data', 'wc_custom_add_custom_fields' );
-function wc_custom_add_custom_fields() {
-    // Print a custom text field
-    woocommerce_wp_checkbox( array(
-        'id' => '_mp_special',
-        'label' => 'Special',
-        'description' => 'Is this product a special? Selecting yes will display in the main ordering page slider. ',
-        'desc_tip' => 'true',
-        //'placeholder' => 'Custom text', 
-        'cbvalue' => 'yes'
-    ) );
-}
-
-add_action( 'woocommerce_process_product_meta', 'wc_custom_save_custom_fields' );
-function wc_custom_save_custom_fields( $post_id ) {
-    if ( ! empty( $_POST['_mp_special'] ) ) {
-        update_post_meta( $post_id, '_mp_special', esc_attr( $_POST['_mp_special'] ) );
-    }
-}
 
 
 /* 

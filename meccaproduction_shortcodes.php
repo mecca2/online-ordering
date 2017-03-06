@@ -3,16 +3,7 @@
 /* 
 All shortcodes available for plugin 
 */
-/*
-function meccaproduction_enqueue_scripts() {
-    wp_register_style( 'mp-slick-css', plugin_dir_path( __FILE__ ) . 'resources/slick/slick.css' );
-    wp_register_style( 'mp-slick-css-theme', plugin_dir_path( __FILE__ ) . 'resources/slick/slick-theme.css' );
-    wp_register_style( 'mp-slick-js', plugin_dir_path( __FILE__ ) . 'resources/slick/slick.min.js' );
-}
 
-add_action( 'wp_enqueue_scripts', 'meccaproduction_enqueue_scripts' );
-
-*/
 
 function shortcode_my_orders( $atts ) {
     extract( shortcode_atts( array(
@@ -20,10 +11,6 @@ function shortcode_my_orders( $atts ) {
     ), $atts ) );
 
     ob_start();
-    /*wc_get_template( 'myaccount/my-orders.php', array(
-        //'current_user'  => get_user_by( 'id', get_current_user_id() ),
-        'order_count'   => $order_count
-    ) );*/
     include(plugin_dir_path( __FILE__ ) . 'templates/orders.php');
     return ob_get_clean();
 }
@@ -35,20 +22,11 @@ function shortcode_specials_slider( $atts ) {
     extract( shortcode_atts( array(
         'order_count' => -1
     ), $atts ) );
-    //wp_register_style( 'mp-slick-css-theme', plugin_dir_path( __FILE__ ) . 'resources/slick/slick-theme.css' );
-    
     wp_enqueue_style('mp-slick-css');
     wp_enqueue_style('mp-slick-css-theme');
     ob_start();
-    
-   // wp_enqueue_script('mp-slick-css-theme');
-    /*wc_get_template( 'myaccount/my-orders.php', array(
-        //'current_user'  => get_user_by( 'id', get_current_user_id() ),
-        'order_count'   => $order_count
-    ) );*/
     include(plugin_dir_path( __FILE__ ) . 'templates/specials_slider.php');
     return ob_get_clean();
-    //wp_enqueue_style('mp-slick-css');
 
 }
 add_shortcode('mp_specials_slider', 'shortcode_specials_slider');

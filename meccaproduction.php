@@ -32,6 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 include('meccaproduction_filters.php');
 include('meccaproduction_shortcodes.php' );
+include(plugin_dir_path( __FILE__ ) . 'public/meccaproduction-product-types.php' );
 
 
 /**
