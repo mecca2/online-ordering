@@ -180,7 +180,13 @@ class Meccaproduction {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		$this->loader->add_action( 'woocommerce_thankyou', $plugin_public, 'calculateTravelTime', 10, 1);
+		$this->loader->add_action( 'woocommerce_thankyou', $plugin_public, 'calculateDeliveryTime', 10, 1);
+
+		$this->loader->add_action( 'woocommerce_cart_calculate_fees',$plugin_public, 'verifyMinimumSubtotal' );
+
+		if(isset( $_GET[ 'debug' ] ) == "1" ){
+			$this->loader->add_filter ('woocommerce_thankyou', $plugin_public, 'get_order_details' );
+		}
 
 	}
 

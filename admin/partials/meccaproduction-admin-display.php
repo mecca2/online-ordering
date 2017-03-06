@@ -43,7 +43,9 @@
 
     		$mp_custom_css = $options['mp_custom_css'];
 
-    		$use_google_maps_api = $options['use_google_maps_api'];
+    		$minimum_delivery_subtotal = $options['minimum_delivery_subtotal'];
+
+    		$use_smart_delivery = $options['use_smart_delivery'];
 
     		$delivery_distance = $options['delivery_distance'];
 
@@ -54,11 +56,14 @@
     		$pickup_city = $options['pickup_city'];
     		$pickup_state = $options['pickup_state'];
 
+    		$pizza_prep_time = $options['pizza_prep_time'];
+    		$pizza_cook_time = $options['pizza_cook_time'];
+
     		$number_cooks = $options['number_cooks'];
     		$number_drivers = $options['number_drivers'];
     		$max_pizza_fullfillment = $options['max_pizza_fullfillment'];
 
-	    	if ($use_google_maps_api && $active_tab == 'smart_delivery') {
+	    	if ($use_smart_delivery && $active_tab == 'smart_delivery') {
 
 	    		if(!empty($options['pickup_lat'] ) && !empty($options['pickup_long'])) {
 	    			$pickup_lat = $options['pickup_lat'];
@@ -73,30 +78,6 @@
 
 	    			$options['pickup_lat'] = $pickup_lat;
 	    			$options['pickup_long'] = $pickup_long;
-	    		}
-
-	    		if($_GET["debug"] == 1) {
-
-	    			$destination_location = getLatLong($google_geocoding_api_key, '555 N Pleasantburg Drive', 'Greenville', 'SC');
-
-					$destination_lat = array_values($destination_location)[0][0][geometry][location][lat];
-					$destination_long = array_values($destination_location)[0][0][geometry][location][lng];
-
-		    		$tripArray = array_values(getDistanceBetweenAddresses($google_distance_matrix_api_key, $pickup_lat. ",". $pickup_long, $destination_lat . "," . $destination_long));
-
-		    		$travel_time = $tripArray[2][0][elements][0][duration][text];
-		    		$travel_distance = $tripArray[2][0][elements][0][distance][text];
-		    		$source = $tripArray[1][0];
-		    		$destination = $tripArray[0][0];
-
-
-		    		echo "Source: " . $source . "<br>";
-		    		echo "Source (Lat,Long): " . $pickup_lat . ", " . $pickup_long . "<br>";
-		    		echo "Destination: " . $destination . "<br>";
-		    		echo "Destination (Lat,Long): " . $destination_lat . ", " . $destination_long . "<br>";
-		    		echo "<br>";
-		    		echo "Travel Time: " . $travel_time . "<br>";
-		    		echo "Distance (miles): " . $travel_distance . "<br>";
 	    		}
 	    	}
     		
@@ -121,14 +102,23 @@
 		    </tr>
 	    <?php //} ?>
 
+	    	<tr>
+		    	<th scope ="row">
+		    		<label for="<?php echo $this->plugin_name;?>-minimum_delivery_subtotal">Minimum Delivery Subtotal</label>
+		    	</th>
+		    	<td>
+		    		<input type="text" class="small-text" id="<?php echo $this->plugin_name; ?>-minimum_delivery_subtotal" name="<?php echo $this->plugin_name; ?>[minimum_delivery_subtotal]" value="<?php if(!empty($minimum_delivery_subtotal)) echo $minimum_delivery_subtotal; ?>"/>
+		    	</td>
+		    </tr>
+
 	    <?php //if($active_tab == 'smart_delivery') {?>
 
 		    <tr>
 		    	<th scope ="row">
-		    		<label for="<?php echo $this->plugin_name;?>-use_google_maps_api">Turn on Smart Delivery?</label>
+		    		<label for="<?php echo $this->plugin_name;?>-use_smart_delivery">Turn on Smart Delivery?</label>
 		    	</th>
 		    	<td>
-		    		<input type="checkbox" id="<?php echo $this->plugin_name;?>-use_google_maps_api" name="<?php echo $this->plugin_name;?>[use_google_maps_api]" value="1" <?php checked( $use_google_maps_api, 1 ); ?> />
+		    		<input type="checkbox" id="<?php echo $this->plugin_name;?>-use_smart_delivery" name="<?php echo $this->plugin_name;?>[use_smart_delivery]" value="1" <?php checked( $use_smart_delivery, 1 ); ?> />
 		    	</td>
 		    </tr>
 
@@ -183,6 +173,23 @@
 		    	</th>
 		    	<td>
 		    		<input type="text" class="small-text" id="<?php echo $this->plugin_name; ?>-pickup_state" name="<?php echo $this->plugin_name; ?>[pickup_state]" value="<?php if(!empty($pickup_state)) echo $pickup_state; ?>"/>
+		    	</td>
+		    </tr>
+
+		    <tr>
+		    	<th scope ="row">
+		    		<label for="<?php echo $this->plugin_name;?>-">Preptime per pizza</label>
+		    	</th>
+		    	<td>
+		    		<input type="text" class="small-text" id="<?php echo $this->plugin_name; ?>-pizza_prep_time" name="<?php echo $this->plugin_name; ?>[pizza_prep_time]" value="<?php if(!empty($pizza_prep_time)) echo $pizza_prep_time; ?>"/>
+		    	</td>
+		    </tr>
+		    <tr>
+		    	<th scope ="row">
+		    		<label for="<?php echo $this->plugin_name;?>-">Cooktime per pizza</label>
+		    	</th>
+		    	<td>
+		    		<input type="text" class="small-text" id="<?php echo $this->plugin_name; ?>-pizza_cook_time" name="<?php echo $this->plugin_name; ?>[pizza_cook_time]" value="<?php if(!empty($pizza_cook_time)) echo $pizza_cook_time; ?>"/>
 		    	</td>
 		    </tr>
 

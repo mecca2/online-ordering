@@ -99,7 +99,6 @@ class Meccaproduction_Admin {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/meccaproduction-admin.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, 'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&signed_in=true', array( 'jquery' ), $this->version, false );
 
 
 	}
@@ -134,7 +133,9 @@ class Meccaproduction_Admin {
 
 		$valid['mp_custom_css'] = (isset($input['mp_custom_css']) && !empty($input['mp_custom_css'])) ? 1 : 0;
 
-		$valid['use_google_maps_api'] = (isset($input['use_google_maps_api']) && !empty($input['use_google_maps_api'])) ? 1 : 0;
+		$valid['minimum_delivery_subtotal'] = sanitize_text_field($input['minimum_delivery_subtotal']);
+
+		$valid['use_smart_delivery'] = (isset($input['use_smart_delivery']) && !empty($input['use_smart_delivery'])) ? 1 : 0;
 
 		$valid['delivery_distance']= ent2ncr($input['delivery_distance']);
 
@@ -144,6 +145,9 @@ class Meccaproduction_Admin {
 		$valid['pickup_address1']= sanitize_text_field($input['pickup_address1']);
 		$valid['pickup_city']= sanitize_text_field($input['pickup_city']);
 		$valid['pickup_state']= strlen($input['pickup_state']) == 2 ? sanitize_text_field($input['pickup_state']) : "";
+
+		$valid['pizza_prep_time']= sanitize_text_field($input['pizza_prep_time']);
+		$valid['pizza_cook_time']= sanitize_text_field($input['pizza_cook_time']);
 
 		$valid['number_cooks']= sanitize_text_field($input['number_cooks']);
 		$valid['number_drivers']= sanitize_text_field($input['number_drivers']);

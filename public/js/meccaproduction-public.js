@@ -29,8 +29,12 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+<<<<<<< HEAD
 
 
 })( jQuery );
 
 
+=======
+})( jQuery );
+>>>>>>> 600d5055ba7c251613cf3beb7c12124463e31adf

@@ -7,13 +7,14 @@ This plugin adds features to woocommerce shopping cart.
 
 ## Features 
 - Smart delivery 
--- Calculates delivery time based on shipping address and location of restuarant 
+-- Calculates delivery time based on shipping address and location of restuarant using Google Maps Geocode API and Google Maps Distance Matrix API, then takes into account other variables, such as preptime per pizza and cooktime per pizza.
 - Product specials 
 -- Field added to product for if it is a special. Slider window is available to display products. 
 - Re-Order 
 - Order Name 
 -- Added option for order name so customer can add name to order for easy re-order in the future. 
 - Custom templates for products and ordering pages
+-- Added minimum delivery amount option that 
 
 ## To-Do 
 - [ ] Parent / Child product relationship for pizza toppings
@@ -21,3 +22,4 @@ This plugin adds features to woocommerce shopping cart.
 - [ ] Build your pizza 
 - [ ] Template for product categories
 - [ ] Template for base products page and shortcodes 
+- [ ] Add minimum delivery subtotal
