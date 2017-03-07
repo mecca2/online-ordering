@@ -78,6 +78,9 @@ class Meccaproduction_Public {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/meccaproduction-public.css', array(), $this->version, 'all' );
 		wp_register_style( 'mp-slick-css', plugin_dir_url( __FILE__ ) . 'slick/slick.css',array(), $this->version, 'all' );
 		wp_register_style( 'mp-slick-css-theme', plugin_dir_url( __FILE__ ) . 'slick/slick-theme.css',array(), $this->version, 'all' );
+		// Jquery Styling
+	    wp_register_style( 'jquery-ui', 'http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css' );
+	    wp_enqueue_style( 'jquery-ui' );  
 	}
 
 	/**
@@ -98,8 +101,11 @@ class Meccaproduction_Public {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
+		wp_enqueue_script( 'jquery' );
+    	wp_enqueue_script( 'jquery-ui-core' );
+		wp_enqueue_script('jquery-ui-datepicker', 'http://jquery-ui.googlecode.com/svn/trunk/ui/jquery.ui.datepicker.js', array('jquery','jquery-ui-core'));
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/meccaproduction-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'functions-script', plugin_dir_url( __FILE__ ) . 'js/' . $this->plugin_name . '-public-functions.js', array( 'jquery' ), $this->version, false );
 
 	}
 
@@ -216,29 +222,228 @@ class Meccaproduction_Public {
 
 	public function verifyMinimumSubtotal() {
 
-		$minimum = $this->meccaproduction_options['minimum_delivery_subtotal'];
-		$cart_subtotal = WC()->cart->get_cart_subtotal();
+		if(is_cart()) {
 
-		if(WC()->cart->subtotal < $this->meccaproduction_options['minimum_delivery_subtotal'] && WC()->cart->shipping_total != 0){
-	            wc_print_notice( 
-	                sprintf( "<strong>We're sorry, the minimum delivery subtotal is %s and your order total is %s.  Please change your selection to Take Out or continue shopping.</strong> " , 
-	                    wc_price( $minimum ), 
-	                    wc_price( WC()->cart->subtotal )
-	                ), 'error' 
-	            );
+			$minimum = $this->meccaproduction_options['minimum_delivery_subtotal'];
+			$cart_subtotal = WC()->cart->get_cart_subtotal();
 
-	            remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
-				add_action('woocommerce_proceed_to_checkout', 'disable_proceed_to_checkout', 20);
+			if(WC()->cart->subtotal < $this->meccaproduction_options['minimum_delivery_subtotal'] && WC()->cart->shipping_total != 0){
+		            wc_print_notice( 
+		                sprintf( "<strong>We're sorry, the minimum delivery subtotal is %s and your order total is %s.  Please change your selection to Take Out or continue shopping.</strong> " , 
+		                    wc_price( $minimum ), 
+		                    wc_price( WC()->cart->subtotal )
+		                ), 'error' 
+		            );
 
-				function disable_proceed_to_checkout() { ?>
-					<a href="<?php echo $extra_url; ?>" class="checkout-button button alt wc-forward" id="checkout-error">
-						<?php _e( 'Unable to Checkout - Minimum Order Amount', 'woocommerce' ); ?>
-					</a>
-				<?php
-				}
-		}else {
-			echo "<script>jQuery('.woocommerce-error').hide();</script>";
+		            remove_action('woocommerce_proceed_to_checkout', 'woocommerce_button_proceed_to_checkout', 20);
+					add_action('woocommerce_proceed_to_checkout', 'disable_proceed_to_checkout', 20);
+
+					function disable_proceed_to_checkout() { ?>
+						<a href="<?php echo $extra_url; ?>" class="checkout-button button alt wc-forward" id="checkout-error">
+							<?php _e( 'Unable to Checkout - Minimum Order Amount', 'woocommerce' ); ?>
+						</a>
+					<?php
+					}
+			}else {
+				echo "<script>jQuery('.woocommerce-error').hide();</script>";
+			}
 		}
+	}
+
+	public function add_reorder_button($order){
+		
+		$orderURL = array_values($order)[0][url];
+		$orderName = array_values($order)[0][name];
+		$orderID = substr($orderURL, strrpos($orderURL, '/') + 1);
+
+
+		echo "<a href='" . $orderURL . "' class='button view'>" . $orderName . "</a>";
+		echo "<a href='javascript:void(0);' class='button meccaproduction_reorder_btn' data-order_id='" . $orderID . "'>Re-Order</a>";
+
+		$checkout_url = wc_get_page_permalink( 'checkout' );
+
+		$ajax_nonce = wp_create_nonce( $this->plugin_name . "-ajax-seurity-nonce" );
+
+		wp_register_script('reorder-script', 'js/' . $this->plugin_name . '-reorder.js');
+		$translation_array = array (
+			'ajaxurl' 				=> admin_url ( 'admin-ajax.php' ),
+			'cart_url' 				=> WC()->cart->get_cart_url(),
+			'ajax_nonce'			=> $ajax_nonce
+		);
+		wp_localize_script ( 'reorder-script', 'global_var', $translation_array );
+		wp_enqueue_script ( 'reorder-script' );
+
+	}
+
+	// Build AJAX response  - Called for Re-Order Function
+	// AJAX Function set in js/meccaproduction-reorder.js
+	// Spatrick 3/6/2017
+	function ajax_get_order_cart() {
+		$check_ajax = check_ajax_referer( $this->plugin_name . '-ajax-seurity-nonce', 'nonce_check' );
+		if ( !$check_ajax ) {
+			exit( 'failed' );
+		}
+
+		$order_id = $_POST[ 'order_id' ];
+		if ( WC ()->cart->get_cart_contents_count() ) {
+			WC ()->cart->empty_cart ();
+		}
+		$error = array();
+		$order = new WC_Order ( trim ( $order_id ) );
+		
+		if ( empty ( $order->id ) ) {
+			return;
+		}
+			
+		foreach ( $order->get_items() as $product_info ) {
+			$product_id = ( int ) apply_filters ( 'woocommerce_add_to_cart_product_id', $product_info ['product_id'] );
+			$qty = ( int ) $product_info ['qty'];
+			$all_variations = array ();
+			$variation_id = ( int ) $product_info[ 'variation_id' ];
+		
+			$cart_product_data = apply_filters ( 'woocommerce_order_again_cart_item_data', array (), $product_info, $order );
+			foreach ( $product_info ['item_meta'] as $product_meta_name => $product_meta_value ) {
+				if ( taxonomy_is_product_attribute( $product_meta_name ) ) {
+					$all_variations [$product_meta_name] = $product_meta_value[0];
+				} else {
+					if ( meta_is_product_attribute( $product_meta_name, $product_meta_value[0], $product_id ) ) {
+						$all_variations[ $product_meta_name ] = $product_meta_value[0];
+					}
+				}
+			}
+		
+			// Add to cart validation
+			if (! apply_filters ( 'woocommerce_add_to_cart_validation', true, $product_id, $qty, $variation_id, $all_variations, $cart_product_data )) {
+				continue;
+			}
+		
+			// Checks availability of products
+			$array = wc_get_product( $product_id );
+		
+			// Add to cart order products
+			$add_to_cart = WC ()->cart->add_to_cart ( $product_id, $qty, $variation_id, $all_variations, $cart_product_data );
+		}
+		// Checks for success or errors
+		if ( $add_to_cart ) {
+			// Message to be shown when items added to cart
+			$success 	= __ ( 'The items are added to cart from your previous order (Order #' . $order_id . ').', 'one-click-order-reorder' );
+			$notice 	= wc_add_notice ( apply_filters ( 'cng_added_to_cart_msg', $success ) );
+			exit( 'success' );
+		} else { 
+			// Message to be shown when items not added to cart
+			$error 		= __ ( 'Something went wrong, items couldn\'t added to cart ', 'one-click-order-reorder' );
+			$notice 	= wc_add_notice ( apply_filters ( 'cng_atc_error', $error ), 'error' );
+			exit( 'failed' );
+		}
+	}
+
+	public function set_future_order_date($checkout) {
+		echo '<br><div id="future_order_date_name"><h2>' . __('Future Order Date') . '</h2>';
+
+		?><p class="form-row form-row-first">
+			<input type="text" id="future_order_date" name="testdate" class="input-text" value="" placeholder="Enter a Date">
+			<input hidden type="text" id="future_order_date_alt">
+		</p><?php
+	    /*
+
+	    woocommerce_form_field( 'future_order_date', array(
+	        'type'          => 'text',
+	        'class'         => array('form-row form-row-first datepicker'),
+	        'label'         => __('Enter a future date.'),
+	        'placeholder'   => __('Enter something'),
+       		'input_class' => array('hasDatepicker')
+	        ), '');
+
+	        */
+
+	    woocommerce_form_field( 'future_order_time', array(
+	        'type'          => 'select',
+	        'class'         => array('form-row form-row-last'),
+	        'options'       => array_keys($this->getOrderTimeIncrements())), '');
+
+	    echo '</div>';
+	    echo '<div class="clear"></div>';
+	}
+
+	public function custom_override_checkout_fields( $fields ){
+		$fields['cart']['shipping_phone'] = array(
+		    'label'     => __('Phone', 'woocommerce'),
+		    'placeholder'   => _x('Phone', 'placeholder', 'woocommerce'),
+		    'required'  => false,
+		    'class'     => array('form-row-wide'),
+		    'clear'     => true
+		     );
+		
+		return $fields;
+	}
+
+	public function getOrderTimeIncrements(){
+		$timePeriod = "AM";
+
+		if(isset($this->meccaproduction_options['openTime'])) {
+			$openTime = intval($this->meccaproduction_options['openTime']);
+		}else {
+			$openTime = intval("8");
+		}
+
+		if(isset($this->meccaproduction_options['closeTime'])) {
+			$closeTime = intval($this->meccaproduction_options['closeTime']);
+		}else {
+			$closeTime = intval("16");
+		}
+
+		if(isset($this->meccaproduction_options['timePeriodSetting'])) {
+			$timePeriodSetting = intval($this->meccaproduction_options['timePeriodSetting']);
+		}else {
+			$timePeriodSetting = intval("12");
+		}
+
+		$timePeriodSetting = "12";
+
+		$arrayTime[] = 'Enter a Time';
+
+		for ($i = 8; $i <= 16; $i++){
+		  for ($j = 0; $j <= 45; $j+=15){
+		    //inside the inner loop
+		    if($j == 0) $j = "00";
+
+		    if($i > 11) $timePeriod = "PM";
+
+		    if($timePeriodSetting == "12" && $i > 12){
+		    	$currentTime = $i - 12 . ":" . $j . " " . $timePeriod;
+			}else {
+				$currentTime = $i . ":" . $j . " " . $timePeriod;
+			}
+
+		    $arrayTime[$currentTime] = $currentTime;
+		  }
+		  if($j == 60) $j = "00";
+		}
+
+		if($timePeriodSetting == "12" && $i > 12){
+	    	$currentTime = $i - 12 . ":" . $j . " " . $timePeriod;
+		}else {
+			$currentTime = $i . ":" . $j . " " . $timePeriod;
+		}
+
+		$arrayTime[$currentTime] = $currentTime;
+
+		return $arrayTime;
+	}
+
+	public function update_meta_fields_checkout ( $order_id ) {
+	    if ( ! empty( $_POST['future_order_time'] ) ) {
+	        update_post_meta( $order_id, 'future_order_time', sanitize_text_field( $_POST['future_order_time'] ) );
+	    }
+	    if ( ! empty( $_POST['future_order_date'] ) ) {
+	        update_post_meta( $order_id, 'future_order_date', sanitize_text_field( $_POST['future_order_date'] ) );
+	    }
+	}
+
+	public function display_admin_order_meta($order) {
+		//echo $order->order_custom_fields;
+		echo '<p><strong>'.__('Order Future Date').':</strong> ' . get_post_meta( $order->id, 'future_order_date', true ) . '</p>';
+	    echo '<p><strong>'.__('Order Future Time').':</strong> ' . get_post_meta( $order->id, 'future_order_time', true ) . '</p>';
 	}
 
 	function get_order_details($order_id){

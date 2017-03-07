@@ -29,12 +29,41 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
 
 
 })( jQuery );
 
+jQuery( document ).ready( function( $ ) {
 
-=======
-})( jQuery );
->>>>>>> 600d5055ba7c251613cf3beb7c12124463e31adf
+	$( '.meccaproduction_reorder_btn' ).on('click',function() {
+		console.log("HERE");
+		var order_id = $( this ).data( 'order_id' );	
+
+		console.log(order_id);
+		ced_cng_ajax( order_id );
+	});
+
+	function ced_cng_ajax( order_id ) {
+		jQuery.ajax({
+			url 	: global_var.ajaxurl,
+			data 	: {
+			   action		: 'get_order_cart',
+			   nonce_check	: global_var.ajax_nonce,
+			   order_id		: order_id
+			},
+			type 	: 'post',
+			success	: function( data ) {
+			  	window.location = global_var.cart_url;
+			}
+		});	
+	}
+});
+
+
+//=======
+//})( jQuery );
+//>>>>>>> 600d5055ba7c251613cf3beb7c12124463e31adf
+
+
+

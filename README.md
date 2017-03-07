@@ -14,7 +14,8 @@ This plugin adds features to woocommerce shopping cart.
 - Order Name 
 -- Added option for order name so customer can add name to order for easy re-order in the future. 
 - Custom templates for products and ordering pages
--- Added minimum delivery amount option that 
+-- Added minimum delivery amount option that is set in the settings page.  Also checks in AJAX shipping method call to see if the customer selected Take Out
+-- Added Re-order functionality on the order-online page, which grabs the order ID, queries items from the order, and redirects customer to the cart page with the items in their cart.
 
 ## To-Do 
 - [ ] Parent / Child product relationship for pizza toppings
