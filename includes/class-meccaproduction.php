@@ -164,6 +164,10 @@ class Meccaproduction {
 		// Save/Update our plugin options
 		$this->loader->add_action('admin_init', $plugin_admin, 'options_update');
 
+		// Add order status for Future Orders
+		$this->loader->add_action( 'init', $plugin_admin, 'register_future_order_status' );
+		$this->loader->add_action( 'wc_order_statuses', $plugin_admin, 'add_future_order_to_order_statuses' );
+
 	}
 
 	/**
@@ -180,25 +184,39 @@ class Meccaproduction {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		$this->loader->add_action( 'woocommerce_thankyou', $plugin_public, 'calculateDeliveryTime', 10, 1);
 
-		// Needed for minimum checkout check on cart page
+		/* CALCULATE DELIVERY TIME */
+		//$this->loader->add_action( 'woocommerce_thankyou', $plugin_public, 'calculateDeliveryTime', 10, 1);
+
+
+		/* MINIMUM ORDER AMOUNT FOR CHECKOUT */
 		$this->loader->add_action( 'woocommerce_cart_calculate_fees',$plugin_public, 'verifyMinimumSubtotal' );
 
-		if(isset( $_GET[ 'debug' ] ) == "1" ){
-			$this->loader->add_filter ('woocommerce_thankyou', $plugin_public, 'get_order_details' );
-		}
 
-		// Re-order functionality
+		/* RE-ORDER FUNCTIONALITY */
+		// Add button to Order Detail Page
 		$this->loader->add_filter ( 'woocommerce_my_account_my_orders_actions', $plugin_public, 'add_reorder_button');
+		// In redirect, capture order_id in POST and grab cart data
 		$this->loader->add_action ( 'wp_ajax_get_order_cart', $plugin_public, 'ajax_get_order_cart' );
 		$this->loader->add_action ( 'wp_ajax_nopriv_get_order_cart', $plugin_public, 'ajax_get_order_cart');
 
 
-		// Set future order date
-		//$this->loader->add_action ( 'woocommerce_checkout_after_customer_details', $plugin_public, 'set_future_order_date');
-		//$this->loader->add_action ( 'woocommerce_checkout_update_order_meta', $plugin_public, 'update_meta_fields_checkout');
-		//$this->loader->add_action( 'woocommerce_admin_order_data_after_billing_address', $plugin_public, 'display_admin_order_meta');
+		/* SET FUTURE ORDER DATE */
+		// Draw out fields on payment page
+		$this->loader->add_action ( 'woocommerce_checkout_after_customer_details', $plugin_public, 'set_future_order_date');
+		// Set Meta fields for date/time
+		$this->loader->add_action ( 'woocommerce_checkout_update_order_meta', $plugin_public, 'update_meta_fields_checkout');
+		// Upate fields in Admin
+		$this->loader->add_action( 'woocommerce_admin_order_data_after_billing_address', $plugin_public, 'display_admin_order_meta');
+		// Set Order Status to Future Order - Will need to be updated into POST
+		$this->loader->add_filter ('woocommerce_thankyou', $plugin_public, 'set_future_order_status' );
+
+
+		/* DEBUG INFO */
+		// Order Debug info
+		if(isset( $_GET[ 'debug' ] ) == "1" ){
+			$this->loader->add_filter ('woocommerce_thankyou', $plugin_public, 'get_order_details' );
+		}
 
 	}
 

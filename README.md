@@ -16,11 +16,11 @@ This plugin adds features to woocommerce shopping cart.
 - Custom templates for products and ordering pages
 -- Added minimum delivery amount option that is set in the settings page.  Also checks in AJAX shipping method call to see if the customer selected Take Out
 -- Added Re-order functionality on the order-online page, which grabs the order ID, queries items from the order, and redirects customer to the cart page with the items in their cart.
+-- Added Future Order Date functionality - Customers can select a future order date on their order which will display on the admin order page
 
 ## To-Do 
 - [ ] Parent / Child product relationship for pizza toppings
 - [ ] Fields on product for type of product 
 - [ ] Build your pizza 
 - [ ] Template for product categories
-- [ ] Template for base products page and shortcodes 
-- [ ] Add minimum delivery subtotal
+- [ ] Template for base products page and shortcodes

@@ -258,7 +258,6 @@ function getLatLong($APIKey, $address1, $city, $state) {
 		    return $djd;
 		}
 	} 
-
 }
 
 function getDistanceBetweenAddresses($APIKey, $from, $to){
@@ -283,7 +282,6 @@ function getDistanceBetweenAddresses($APIKey, $from, $to){
 		    return $djd;
 		}
 	}
-
 }
 
 

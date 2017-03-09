@@ -128,6 +128,33 @@ class Meccaproduction_Admin {
 	    register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 	 }
 
+	public function register_future_order_status() {
+		register_post_status( 'wc-future-order', array(
+	        'label'                     => 'Future Order',
+	        'public'                    => true,
+	        'exclude_from_search'       => false,
+	        'show_in_admin_all_list'    => true,
+	        'show_in_admin_status_list' => true,
+	        'label_count'               => _n_noop( 'Future Order <span class="count">(%s)</span>', 'Future order <span class="count">(%s)</span>' )
+	    ) );
+	}
+
+	public function add_future_order_to_order_statuses( $order_statuses ){
+		$new_order_statuses = array();
+  
+	    // add new order status after processing
+	    foreach ( $order_statuses as $key => $status ) {
+	  
+	        $new_order_statuses[ $key ] = $status;
+	  
+	        if ( 'wc-processing' === $key ) {
+	            $new_order_statuses['wc-future-order'] = 'Future Order';
+	        }
+	    }
+	  
+	    return $new_order_statuses;
+	}
+
 	public function validate($input) {
 		$valid = array();
 

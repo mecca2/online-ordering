@@ -5,10 +5,8 @@ jQuery( document ).ready( function( $ ) {
 
     $("#future_order_date").datepicker({
     	altFormat: "yy-mm-dd",
-    	altField: "#future_order_date_alt",
+    	altField: "#future_order_date_formatted",
     	minDate : 0
     });
-
-    console.log("herer");
 
 });

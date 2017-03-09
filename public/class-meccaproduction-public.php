@@ -338,31 +338,28 @@ class Meccaproduction_Public {
 	}
 
 	public function set_future_order_date($checkout) {
-		echo '<br><div id="future_order_date_name"><h2>' . __('Future Order Date') . '</h2>';
+		?> 
+		<br>
+		<div id="future_order_date_section">
+			<div id="future_order_date_values">
+				<div id="future_order_date_name">
+					<h2> <?php echo __('Future Order Date?') ?> </h2>
+				</div> 
+				<p class="form-row form-row-first">
+					<input type="text" id="future_order_date" name="future_order_date" class="input-text" value="" placeholder="Enter a Date">
+					<input hidden type="text" id="future_order_date_formatted" name="future_order_date_formatted">
+				</p><?php
 
-		?><p class="form-row form-row-first">
-			<input type="text" id="future_order_date" name="testdate" class="input-text" value="" placeholder="Enter a Date">
-			<input hidden type="text" id="future_order_date_alt">
-		</p><?php
-	    /*
+			    woocommerce_form_field( 'future_order_time', array(
+			        'type'          => 'select',
+			        'class'         => array('form-row form-row-last'),
+			        'options'       => $this->getOrderTimeIncrements()), '');
 
-	    woocommerce_form_field( 'future_order_date', array(
-	        'type'          => 'text',
-	        'class'         => array('form-row form-row-first datepicker'),
-	        'label'         => __('Enter a future date.'),
-	        'placeholder'   => __('Enter something'),
-       		'input_class' => array('hasDatepicker')
-	        ), '');
-
-	        */
-
-	    woocommerce_form_field( 'future_order_time', array(
-	        'type'          => 'select',
-	        'class'         => array('form-row form-row-last'),
-	        'options'       => array_keys($this->getOrderTimeIncrements())), '');
-
-	    echo '</div>';
-	    echo '<div class="clear"></div>';
+			        ?>
+   			</div>
+	    </div>
+	    <br>
+	   	<div class="clear"></div> <?php
 	}
 
 	public function custom_override_checkout_fields( $fields ){
@@ -379,6 +376,7 @@ class Meccaproduction_Public {
 
 	public function getOrderTimeIncrements(){
 		$timePeriod = "AM";
+		$formattedTime = "";
 
 		if(isset($this->meccaproduction_options['openTime'])) {
 			$openTime = intval($this->meccaproduction_options['openTime']);
@@ -392,58 +390,67 @@ class Meccaproduction_Public {
 			$closeTime = intval("16");
 		}
 
-		if(isset($this->meccaproduction_options['timePeriodSetting'])) {
-			$timePeriodSetting = intval($this->meccaproduction_options['timePeriodSetting']);
-		}else {
-			$timePeriodSetting = intval("12");
-		}
-
 		$timePeriodSetting = "12";
 
-		$arrayTime[] = 'Enter a Time';
+		$arrayTime['Enter a Time'] = 'Enter a Time';
 
-		for ($i = 8; $i <= 16; $i++){
-		  for ($j = 0; $j <= 45; $j+=15){
-		    //inside the inner loop
-		    if($j == 0) $j = "00";
+		for ($i = 8; $i <= 16; $i++){		// Step Through Hours
+		  for ($j = 0; $j <= 45; $j+=15){	// Step through 15 min increments
 
-		    if($i > 11) $timePeriod = "PM";
+		    if($j == 0) $j = "00";			// Formatting for minutes
 
-		    if($timePeriodSetting == "12" && $i > 12){
+		    if($i > 11) $timePeriod = "PM";	// Formatting for Time Period
+
+			if($i > 12){
 		    	$currentTime = $i - 12 . ":" . $j . " " . $timePeriod;
 			}else {
 				$currentTime = $i . ":" . $j . " " . $timePeriod;
 			}
 
-		    $arrayTime[$currentTime] = $currentTime;
+			$formattedTime = $i . ":" . $j . " " . $timePeriod;;
+
+		    $arrayTime[$formattedTime] = $currentTime;
 		  }
-		  if($j == 60) $j = "00";
+		  if($j == 60) $j = "00";			// Formatting for minutes
 		}
 
-		if($timePeriodSetting == "12" && $i > 12){
-	    	$currentTime = $i - 12 . ":" . $j . " " . $timePeriod;
-		}else {
-			$currentTime = $i . ":" . $j . " " . $timePeriod;
-		}
-
-		$arrayTime[$currentTime] = $currentTime;
+		$arrayTime[$formattedTime] = $currentTime;
 
 		return $arrayTime;
 	}
 
 	public function update_meta_fields_checkout ( $order_id ) {
-	    if ( ! empty( $_POST['future_order_time'] ) ) {
-	        update_post_meta( $order_id, 'future_order_time', sanitize_text_field( $_POST['future_order_time'] ) );
-	    }
-	    if ( ! empty( $_POST['future_order_date'] ) ) {
+		$order = wc_get_order( $order_id );
+
+	    if ( ! empty( $_POST['future_order_time'] )  &&  ! empty( $_POST['future_order_date'] ) ) {
+	        update_post_meta( $order_id, 'future_order_time', sanitize_text_field( $_POST['future_order_time'] ));
 	        update_post_meta( $order_id, 'future_order_date', sanitize_text_field( $_POST['future_order_date'] ) );
+
+	        $order->update_status('wc-future-order');
 	    }
 	}
 
 	public function display_admin_order_meta($order) {
-		//echo $order->order_custom_fields;
-		echo '<p><strong>'.__('Order Future Date').':</strong> ' . get_post_meta( $order->id, 'future_order_date', true ) . '</p>';
-	    echo '<p><strong>'.__('Order Future Time').':</strong> ' . get_post_meta( $order->id, 'future_order_time', true ) . '</p>';
+
+		$future_order_time = get_post_meta( $order->id, 'future_order_time', true );
+		$future_order_date = get_post_meta( $order->id, 'future_order_date', true );
+
+		echo '<p><strong>'.__('Order Future Date').':</strong> ' . $future_order_time . '</p>';
+	    echo '<p><strong>'.__('Order Future Time').':</strong> ' . $future_order_date . '</p>';
+
+	}
+
+	public function set_future_order_status($order_id) {
+
+		$order = wc_get_order( $order_id );
+
+		$future_order_time = get_post_meta( $order->id, 'future_order_time', true );
+		$future_order_date = get_post_meta( $order->id, 'future_order_date', true );
+
+		if(! empty($future_order_time) && ! empty($future_order_date)) {
+			$order->update_status('wc-future-order');
+		}
+
 	}
 
 	function get_order_details($order_id){
