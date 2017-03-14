@@ -163,6 +163,13 @@ class Meccaproduction {
 
 		// Save/Update our plugin options
 		$this->loader->add_action('admin_init', $plugin_admin, 'options_update');
+		// Save/Update our Smart Delivery options
+		//$this->loader->add_action('admin_init', $plugin_admin, 'smart_delivery_options_update');
+		// Save/Update our Omnivore options
+		//$this->loader->add_action('admin_init', $plugin_admin, 'omnivore_options_update');
+
+		// Add Sections
+		//$this->loader->add_action('admin_init', $plugin_admin, 'register_meccaproduction_sections');
 
 		// Add order status for Future Orders
 		$this->loader->add_action( 'init', $plugin_admin, 'register_future_order_status' );

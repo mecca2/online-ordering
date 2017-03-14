@@ -16,22 +16,22 @@
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 
 
+
+
 <div class="wrap">
 
     <h2><?php echo esc_html(get_admin_page_title()); ?></h2>
 
     <?php
 		if( isset( $_GET[ 'tab' ] ) ) {
-		    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'custom_style';
-		}else{
-			$active_tab = 'custom_style';
+		    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'smart_delivery';
 		}
 	?>
 
     <!-- <h2 class="nav-tab-wrapper">
-            <a href="?page=meccaproduction&tab=custom_style" class="nav-tab <?php //echo $active_tab == 'custom_style' ? 'nav-tab-active' : ''; ?>">Custom Style</a>
-            <a href="?page=meccaproduction&tab=smart_delivery" class="nav-tab <?php //echo $active_tab == 'smart_delivery' ? 'nav-tab-active' : ''; ?>">Smart Delivery</a>
-    </h2> -->
+	    <a href="?page=<?php echo $this->plugin_name; ?>&tab=smart_delivery" class="nav-tab <?php echo $active_tab == 'smart_delivery' ? 'nav-tab-active' : ''; ?>">Smart Delivery</a>
+	    <a href="?page=<?php echo $this->plugin_name; ?>&tab=omnivore" class="nav-tab <?php echo $active_tab == 'omnivore' ? 'nav-tab-active' : ''; ?>">Omnivore</a>
+	</h2> -->
 
     <form method="post" name="cleanup_options" action="options.php">
 
@@ -41,13 +41,14 @@
     	<?php
     		$options = get_option($this->plugin_name);
 
-    		$mp_custom_css = $options['mp_custom_css'];
-
     		$minimum_delivery_subtotal = $options['minimum_delivery_subtotal'];
 
     		$use_smart_delivery = $options['use_smart_delivery'];
 
     		$delivery_distance = $options['delivery_distance'];
+
+    		$omnivore_api_key = $options['omnivore_api_key'];
+    		$omnivore_location_id = $options['omnivore_location_id'];
 
     		$google_geocoding_api_key = $options['google_geocoding_api_key'];
     		$google_distance_matrix_api_key = $options['google_distance_matrix_api_key'];
@@ -63,7 +64,7 @@
     		$number_drivers = $options['number_drivers'];
     		$max_pizza_fullfillment = $options['max_pizza_fullfillment'];
 
-	    	if ($use_smart_delivery && $active_tab == 'smart_delivery') {
+	    	/* if ($use_smart_delivery && $active_tab == 'smart_delivery') {
 
 	    		if(!empty($options['pickup_lat'] ) && !empty($options['pickup_long'])) {
 	    			$pickup_lat = $options['pickup_lat'];
@@ -79,28 +80,31 @@
 	    			$options['pickup_lat'] = $pickup_lat;
 	    			$options['pickup_long'] = $pickup_long;
 	    		}
-	    	}
+	    	} */
     		
 
     	?>
 
     	<?php
-	        settings_fields($this->plugin_name);
+
+    		settings_fields($this->plugin_name);
 	        do_settings_sections($this->plugin_name);
+
+    		/*
+    		if( $active_tab == 'smart_delivery' ) {
+	        	settings_fields($this->plugin_name);
+	        	do_settings_sections($this->plugin_name);
+	        }elseif( $active_tab == 'omnivore' ){
+	        	settings_fields($this->plugin_name);
+	        	do_settings_sections($this->plugin_name);
+	        }
+	        */
 	    ?>
 
 
 	    <!-- remove some meta and generators from the <head> -->
-	    <?php //if($active_tab == 'custom_style') {?>
-		    <tr>
-		    	<th scope ="row">
-		    		<label for="<?php echo $this->plugin_name;?>-mp_custom_css">Use custom Mecca Production CSS</label>
-		    	</th>
-		    	<td>
-		    		<input type="checkbox" id="<?php echo $this->plugin_name;?>-mp_custom_css" name="<?php echo $this->plugin_name;?>[mp_custom_css]" value="1" <?php checked( $mp_custom_css, 1 ); ?> />
-		    	</td>
-		    </tr>
-	    <?php //} ?>
+	    <?php //if($active_tab == 'omnivore') {?>
+	    
 
 	    	<tr>
 		    	<th scope ="row">
@@ -111,7 +115,26 @@
 		    	</td>
 		    </tr>
 
-	    <?php //if($active_tab == 'smart_delivery') {?>
+		    <tr>
+		    	<th scope ="row">
+		    		<label for="<?php echo $this->plugin_name;?>-omnivore_api_key">Omnivore API Key</label>
+		    	</th>
+		    	<td>
+		    		<input type="text" class="regular-text" id="<?php echo $this->plugin_name; ?>-omnivore_api_key" name="<?php echo $this->plugin_name; ?>[omnivore_api_key]" value="<?php if(!empty($omnivore_api_key)) echo $omnivore_api_key; ?>"/>
+		    	</td>
+		    </tr>
+
+		    <tr>
+		    	<th scope ="row">
+		    		<label for="<?php echo $this->plugin_name;?>-omnivore_location_id">Omnivore Location ID</label>
+		    	</th>
+		    	<td>
+		    		<input type="text" class="regular-text" id="<?php echo $this->plugin_name; ?>-omnivore_location_id" name="<?php echo $this->plugin_name; ?>[omnivore_location_id]" value="<?php if(!empty($omnivore_location_id)) echo $omnivore_location_id; ?>"/>
+		    	</td>
+		    </tr>
+		<?php //} ?>
+
+	    <?php //if($active_tab == 'smart_delivery') { ?>
 
 		    <tr>
 		    	<th scope ="row">
@@ -234,14 +257,14 @@
 	    <?php submit_button('Save all changes', 'primary','submit', TRUE); ?>
 
 
+	    <input type="button" id="insert-om-products" placeholder="Add Products" value="Add Products" class="button">
     </form>
 </div>
-
-
 
 <?php
 
 
+/*
 function getLatLong($APIKey, $address1, $city, $state) {
 
 	if(!empty($APIKey)){
@@ -282,7 +305,7 @@ function getDistanceBetweenAddresses($APIKey, $from, $to){
 		    return $djd;
 		}
 	}
-}
+} */
 
 
 

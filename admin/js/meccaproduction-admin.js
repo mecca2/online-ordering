@@ -28,5 +28,18 @@
 	 * Although scripts in the WordPress core, Plugins and Themes may be
 	 * practising this, we should strive to set a better example in our own work.
 	 */
+$(document).ready(function(){
+	$('#insert-om-products').click(function() {
+
+		$.ajax({
+		  type: "POST",
+		  url: "../wp-content/plugins/meccaproduction/admin/partials/om-add-products.php",
+		  data: { action: "add_products" }
+		}).done(function( msg ) {
+		  alert( "Data Saved: " + msg );
+		});    
+
+	});
+	});
 
 })( jQuery );

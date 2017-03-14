@@ -53,7 +53,6 @@ class Meccaproduction_Admin {
 		$this->version = $version;
 
 		$this->meccaproduction_options = get_option($this->plugin_name);
-
 	}
 
 	/**
@@ -123,48 +122,25 @@ class Meccaproduction_Admin {
 	public function display_plugin_setup_page() {
 	    include_once( 'partials/meccaproduction-admin-display.php' );
 	}
+	
 
 	public function options_update() {
 	    register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 	 }
 
-	public function register_future_order_status() {
-		register_post_status( 'wc-future-order', array(
-	        'label'                     => 'Future Order',
-	        'public'                    => true,
-	        'exclude_from_search'       => false,
-	        'show_in_admin_all_list'    => true,
-	        'show_in_admin_status_list' => true,
-	        'label_count'               => _n_noop( 'Future Order <span class="count">(%s)</span>', 'Future order <span class="count">(%s)</span>' )
-	    ) );
-	}
 
-	public function add_future_order_to_order_statuses( $order_statuses ){
-		$new_order_statuses = array();
-  
-	    // add new order status after processing
-	    foreach ( $order_statuses as $key => $status ) {
-	  
-	        $new_order_statuses[ $key ] = $status;
-	  
-	        if ( 'wc-processing' === $key ) {
-	            $new_order_statuses['wc-future-order'] = 'Future Order';
-	        }
-	    }
-	  
-	    return $new_order_statuses;
-	}
 
 	public function validate($input) {
 		$valid = array();
-
-		$valid['mp_custom_css'] = (isset($input['mp_custom_css']) && !empty($input['mp_custom_css'])) ? 1 : 0;
 
 		$valid['minimum_delivery_subtotal'] = sanitize_text_field($input['minimum_delivery_subtotal']);
 
 		$valid['use_smart_delivery'] = (isset($input['use_smart_delivery']) && !empty($input['use_smart_delivery'])) ? 1 : 0;
 
 		$valid['delivery_distance']= ent2ncr($input['delivery_distance']);
+
+		$valid['omnivore_api_key'] = sanitize_text_field($input['omnivore_api_key']);
+		$valid['omnivore_location_id'] = sanitize_text_field($input['omnivore_location_id']);
 
 		$valid['google_geocoding_api_key'] = sanitize_text_field($input['google_geocoding_api_key']);
 		$valid['google_distance_matrix_api_key'] = sanitize_text_field($input['google_distance_matrix_api_key']);
@@ -211,6 +187,34 @@ class Meccaproduction_Admin {
 			}
 		}
 
+	}
+
+
+	public function register_future_order_status() {
+		register_post_status( 'wc-future-order', array(
+	        'label'                     => 'Future Order',
+	        'public'                    => true,
+	        'exclude_from_search'       => false,
+	        'show_in_admin_all_list'    => true,
+	        'show_in_admin_status_list' => true,
+	        'label_count'               => _n_noop( 'Future Order <span class="count">(%s)</span>', 'Future order <span class="count">(%s)</span>' )
+	    ) );
+	}
+
+	public function add_future_order_to_order_statuses( $order_statuses ){
+		$new_order_statuses = array();
+  
+	    // add new order status after processing
+	    foreach ( $order_statuses as $key => $status ) {
+	  
+	        $new_order_statuses[ $key ] = $status;
+	  
+	        if ( 'wc-processing' === $key ) {
+	            $new_order_statuses['wc-future-order'] = 'Future Order';
+	        }
+	    }
+	  
+	    return $new_order_statuses;
 	}
 
 }
